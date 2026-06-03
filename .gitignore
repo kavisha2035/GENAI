@@ -1,0 +1,17 @@
+# Dependency folders
+node_modules/
+Backend/node_modules/
+Frontend/node_modules/
+
+# Environment secrets
+.env
+Backend/.env
+Frontend/.env
+
+# # Production build outputs
+# Frontend/dist/
+# Frontend/build/
+
+# # Local system files
+# .DS_Store
+# Thumbs.db
