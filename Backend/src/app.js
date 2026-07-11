@@ -52,13 +52,23 @@ app.use("/api/analytics", analyticsRouter)
 app.use("/api/share", shareRouter)
 app.use("/api/tracker", jobTrackerRouter)
 
-// Serve frontend static assets in production
+// Serve frontend static assets in production if they exist
 const frontendDistPath = path.join(__dirname, "../../Frontend/dist")
 if (fs.existsSync(frontendDistPath)) {
     app.use(express.static(frontendDistPath))
     app.get("/*splat", (req, res) => {
         res.sendFile(path.join(frontendDistPath, "index.html"))
     })
+} else {
+    // Fallback root route for API-only hosting (e.g. Render backend) to pass health checks
+    app.get("/", (req, res) => {
+        res.status(200).send("Interview Prep AI Backend API is running.")
+    })
 }
+
+// Explicit health check endpoint
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok", message: "Server is healthy" })
+})
 
 module.exports = app
