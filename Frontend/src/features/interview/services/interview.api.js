@@ -90,7 +90,8 @@ export const evaluateAnswerApi = async ({ question, userAnswer, questionType }) 
  */
 export const streamContentApi = async ({ prompt, context, onChunk, onDone, onError }) => {
     try {
-        const response = await fetch("http://localhost:3000/api/mock-session/stream", {
+        const baseUrl = import.meta.env.VITE_API_URL !== undefined ? import.meta.env.VITE_API_URL : "http://localhost:3000"
+        const response = await fetch(`${baseUrl}/api/mock-session/stream`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
