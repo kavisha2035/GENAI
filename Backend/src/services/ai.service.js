@@ -390,15 +390,24 @@ function transformAIResponse(data) {
     const technicalQuestions = []
     let techQArray = data.technical_questions || data.technicalQuestions || []
 
-    // If it's a single long array, group by 3 (intention, question, answer)
     if (Array.isArray(techQArray) && techQArray.length > 0) {
-        for (let i = 0; i < techQArray.length; i += 3) {
-            if (i + 2 < techQArray.length) {
+        if (typeof techQArray[0] === 'object' && techQArray[0] !== null) {
+            techQArray.forEach(q => {
                 technicalQuestions.push({
-                    intention: String(techQArray[i]),
-                    question: String(techQArray[i + 1]),
-                    answer: String(techQArray[i + 2])
+                    intention: q.intention || "",
+                    question: q.question || "",
+                    answer: q.answer || ""
                 })
+            })
+        } else {
+            for (let i = 0; i < techQArray.length; i += 3) {
+                if (i + 2 < techQArray.length) {
+                    technicalQuestions.push({
+                        intention: String(techQArray[i]),
+                        question: String(techQArray[i + 1]),
+                        answer: String(techQArray[i + 2])
+                    })
+                }
             }
         }
     }
@@ -408,13 +417,23 @@ function transformAIResponse(data) {
     let behavQArray = data.behavioral_questions || data.behavioralQuestions || []
 
     if (Array.isArray(behavQArray) && behavQArray.length > 0) {
-        for (let i = 0; i < behavQArray.length; i += 3) {
-            if (i + 2 < behavQArray.length) {
+        if (typeof behavQArray[0] === 'object' && behavQArray[0] !== null) {
+            behavQArray.forEach(q => {
                 behavioralQuestions.push({
-                    intention: String(behavQArray[i]),
-                    question: String(behavQArray[i + 1]),
-                    answer: String(behavQArray[i + 2])
+                    intention: q.intention || "",
+                    question: q.question || "",
+                    answer: q.answer || ""
                 })
+            })
+        } else {
+            for (let i = 0; i < behavQArray.length; i += 3) {
+                if (i + 2 < behavQArray.length) {
+                    behavioralQuestions.push({
+                        intention: String(behavQArray[i]),
+                        question: String(behavQArray[i + 1]),
+                        answer: String(behavQArray[i + 2])
+                    })
+                }
             }
         }
     }
@@ -424,14 +443,23 @@ function transformAIResponse(data) {
     let skillsArray = data.skill_gaps || data.skillGaps || []
 
     if (Array.isArray(skillsArray) && skillsArray.length > 0) {
-        for (let i = 0; i < skillsArray.length; i += 2) {
-            if (i + 1 < skillsArray.length) {
-                const severityValue = String(skillsArray[i + 1]).toLowerCase()
-                if (['low', 'medium', 'high'].includes(severityValue)) {
-                    skillGaps.push({
-                        skill: String(skillsArray[i]),
-                        severity: severityValue
-                    })
+        if (typeof skillsArray[0] === 'object' && skillsArray[0] !== null) {
+            skillsArray.forEach(s => {
+                skillGaps.push({
+                    skill: s.skill || "",
+                    severity: String(s.severity || "medium").toLowerCase()
+                })
+            })
+        } else {
+            for (let i = 0; i < skillsArray.length; i += 2) {
+                if (i + 1 < skillsArray.length) {
+                    const severityValue = String(skillsArray[i + 1]).toLowerCase()
+                    if (['low', 'medium', 'high'].includes(severityValue)) {
+                        skillGaps.push({
+                            skill: String(skillsArray[i]),
+                            severity: severityValue
+                        })
+                    }
                 }
             }
         }
@@ -442,23 +470,34 @@ function transformAIResponse(data) {
     let planArray = data.preparation_plan || data.preparationPlan || []
 
     if (Array.isArray(planArray) && planArray.length > 0) {
-        for (let i = 0; i < planArray.length; i += 3) {
-            if (i + 2 < planArray.length) {
-                const dayNum = parseInt(planArray[i]) || (i / 3 + 1)
-                const focusStr = String(planArray[i + 1])
-                const tasksStr = String(planArray[i + 2])
-
-                // Parse tasks from string (split by period or bullet points)
-                const tasks = tasksStr
-                    .split(/[.\n•-]+/)
-                    .map(t => t.trim())
-                    .filter(t => t.length > 0)
-
+        if (typeof planArray[0] === 'object' && planArray[0] !== null) {
+            planArray.forEach(p => {
+                const tasks = Array.isArray(p.tasks) ? p.tasks : [p.tasks].filter(Boolean)
                 preparationPlan.push({
-                    day: dayNum,
-                    focus: focusStr,
-                    tasks: tasks.length > 0 ? tasks : [tasksStr]
+                    day: parseInt(p.day) || 1,
+                    focus: p.focus || "",
+                    tasks: tasks
                 })
+            })
+        } else {
+            for (let i = 0; i < planArray.length; i += 3) {
+                if (i + 2 < planArray.length) {
+                    const dayNum = parseInt(planArray[i]) || (i / 3 + 1)
+                    const focusStr = String(planArray[i + 1])
+                    const tasksStr = String(planArray[i + 2])
+
+                    // Parse tasks from string (split by period or bullet points)
+                    const tasks = tasksStr
+                        .split(/[.\n•-]+/)
+                        .map(t => t.trim())
+                        .filter(t => t.length > 0)
+
+                    preparationPlan.push({
+                        day: dayNum,
+                        focus: focusStr,
+                        tasks: tasks.length > 0 ? tasks : [tasksStr]
+                    })
+                }
             }
         }
     }
