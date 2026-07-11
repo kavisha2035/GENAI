@@ -22,14 +22,16 @@ function generateTokenPair(user) {
 }
 
 function setTokenCookies(res, accessToken, refreshToken) {
-    res.cookie("token", accessToken, {
+    const isProd = process.env.NODE_ENV === "production"
+    const cookieOptions = {
         httpOnly: true,
-        sameSite: "lax",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
         maxAge: 15 * 60 * 1000  // 15 minutes
-    })
+    }
+    res.cookie("token", accessToken, cookieOptions)
     res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        sameSite: "lax",
+        ...cookieOptions,
         maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
     })
 }
@@ -126,8 +128,14 @@ async function logoutUserController(req,res){
     if(refreshToken){
         await tokenBlacklistModel.create({token: refreshToken})
     }
-    res.clearCookie("token")
-    res.clearCookie("refreshToken")
+    const isProd = process.env.NODE_ENV === "production"
+    const cookieOptions = {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax"
+    }
+    res.clearCookie("token", cookieOptions)
+    res.clearCookie("refreshToken", cookieOptions)
     res.status(200).json({
         message:"User logged out successfully"
     })
